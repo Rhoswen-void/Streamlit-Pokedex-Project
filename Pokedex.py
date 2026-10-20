@@ -5,16 +5,33 @@ st.title("Pokédex")
 st.markdown("#### Enter the name of the Pokemon")
 pokemon_name = st.text_input(" ")
 
-if pokemon_name:
+
+base = st.sidebar.button("Base")
+mega = st.sidebar.button("Mega Evolution")
+mega_x = st.sidebar.button("Mega Evolution X")
+mega_y = st.sidebar.button("Mega Evolution Y")
+
+if base:
   url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}"
-  response = requests.get(url)
+elif mega:
+  url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}-mega"
+elif mega_x:
+  url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}-mega-x"
+elif mega_y:
+  url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}-mega-y"
+else:
+  url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}"
+
+
+if pokemon_name:
+
+  response = requests.get(url)    
 
   if response.status_code == 200:
     pokemon_info = response.json()
     p_name = pokemon_info["name"].capitalize()
     p_id = pokemon_info["id"]
-
-    st.subheader(f"{p_name} (#{p_id})")
+    st.subheader(f"{p_name.title()} (#{p_id})")
 
     type_colors = {
         "Normal": "#A8A878",
@@ -51,14 +68,28 @@ if pokemon_name:
     with col2:
       st.markdown("### Quick Info")
       # Display types nicely
-      st.markdown(f"**Height:** {pokemon_info['height'] * 0.1:.1f} m")
-      st.markdown(f"**Weight:** {pokemon_info['weight'] * 0.1:.1f} kg")
+      with st.popover("Type"):
+        for item in pokemon_info["types"]:
+          t_name = item["type"]["name"].capitalize()
+          #Fall back to gray if type isn't found
+          bg_color = type_colors.get(t_name, "#777777")
+        
+          #Render custom html badge
+          st.markdown(
+              f'<span style="background-color: {bg_color}; color: white; padding:'
+              f' 5px 14px; border-radius: 15px; font-weight: bold; font-size:'
+              f' 14px; display: inline-block; margin-bottom: 5px;">{t_name}</span>',
+              unsafe_allow_html=True,
+          )#Used to add a custom layout for every type
+        
+      st.markdown(f"> **Height:** {pokemon_info['height'] * 0.1:.1f} m")
+      st.markdown(f"> **Weight:** {pokemon_info['weight'] * 0.1:.1f} kg")
 
     st.markdown("---")
     with st.popover("Settings"):
         st.markdown("### Select the info you want to view related to the pokemon: ")
         selected_choice = st.multiselect(
-            " ", ["STATS", "ABILITIES", "MOVES","TYPES"], default=["STATS"]
+            " ", ["STATS","ABILITIES","MOVES"], default=["STATS"]
         )
 
     if "STATS" in selected_choice:
@@ -66,8 +97,6 @@ if pokemon_name:
       # Optional: You can put stats in columns or use metric cards here too!
       for i in pokemon_info["stats"]:
         st.markdown(f"> **{i['stat']['name'].upper()}:** {i['base_stat']}")
-        
-
 
     if "MOVES" in selected_choice:
       st.markdown("### **Pokemon Moves**")
@@ -79,20 +108,7 @@ if pokemon_name:
       for i in pokemon_info["abilities"]:
         st.markdown(f"> *{i["ability"]["name"].capitalize()}*")
 
-    if "TYPES" in selected_choice:
-      st.markdown("### **Pokemon Type**")
-      for item in pokemon_info["types"]:
-        t_name = item["type"]["name"].capitalize()
-        #Fall back to gray if type isn't found
-        bg_color = type_colors.get(t_name, "#777777")
-
-        #Render custom html badge
-        st.markdown(
-            f'<span style="background-color: {bg_color}; color: white; padding:'
-            f' 5px 14px; border-radius: 15px; font-weight: bold; font-size:'
-            f' 14px; display: inline-block; margin-bottom: 5px;">{t_name}</span>',
-            unsafe_allow_html=True,
-        )#Used to add a custom layout for every type
-
+    
+      
   else:
     st.error("Pokémon not found! Check the spelling and try again.")
