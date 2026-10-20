@@ -5,22 +5,34 @@ st.title("Pokédex")
 st.markdown("#### Enter the name of the Pokemon")
 pokemon_name = st.text_input(" ")
 
+st.sidebar.markdown("> ### **FORMS**")
+with st.sidebar.popover("Forms"):
+  form = st.radio(
+      "Select a form",
+      [
+          "Base Form",
+          "Mega Evolution",
+          "Mega Evolution X",
+          "Mega Evolution Y",
+      ],
+      captions=[
+          "Standard Form",
+          "Awakened Power",
+          "Physical Striker Form",
+          "Special Sweeper Form",
+      ],
+      horizontal=True,
+  )
 
-base = st.sidebar.button("Base")
-mega = st.sidebar.button("Mega Evolution")
-mega_x = st.sidebar.button("Mega Evolution X")
-mega_y = st.sidebar.button("Mega Evolution Y")
-
-if base:
+if form == "Base Form":
   url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}"
-elif mega:
+elif form == "Mega Evolution":
   url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}-mega"
-elif mega_x:
+elif form == "Mega Evolution X":
   url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}-mega-x"
-elif mega_y:
+elif form == "Mega Evolution Y":
   url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}-mega-y"
-else:
-  url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}"
+
 
 
 if pokemon_name:
