@@ -10,40 +10,60 @@ with st.sidebar.popover("Forms"):
   form = st.radio(
       "Select a form",
       [
-          "Base Form",
-          "Mega Evolution",
-          "Mega Evolution X",
-          "Mega Evolution Y",
+          "*Base Form*",
+          "***Mega Evolution***",
+          ":rainbow[Mega Evolution X]",
+          ":rainbow[Mega Evolution Y]",
+          ":red[Primal Form]",
       ],
       captions=[
           "Standard Form",
           "Awakened Power",
           "Physical Striker Form",
           "Special Sweeper Form",
+          "Original Nature Restored",
       ],
       horizontal=True,
   )
 
-if form == "Base Form":
+if form == "*Base Form*":
   url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}"
-elif form == "Mega Evolution":
+  response = requests.get(url)
+  if response.status_code != 200:
+    st.error("Either the Pokemon spelling is wrong or the Pokemon Entry doesn't Exist")
+
+elif form == "***Mega Evolution***":
   url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}-mega"
-elif form == "Mega Evolution X":
+  response = requests.get(url)
+  if response.status_code != 200:
+    st.error("Sorry the above pokemon does not have a Mega Evoltuion Form...")
+
+elif form == ":rainbow[Mega Evolution X]":
   url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}-mega-x"
-elif form == "Mega Evolution Y":
+  response = requests.get(url)
+  if response.status_code != 200:
+     st.error("Sorry the above pokemon does not have a Mega Evolution X")
+
+elif form == ":rainbow[Mega Evolution Y]":
   url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}-mega-y"
+  response = requests.get(url)
+  if response.status_code != 200:
+       st.error("Sorry the above pokemon does not have a Mega Evolution X")
+
+elif form == ":red[Primal Form]":
+  url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}-primal"
+  response = requests.get(url)
+  if response.status_code != 200:
+    st.error("Sorry the above pokemon does not have a Primal Form")
 
 
 
-if pokemon_name:
-
-  response = requests.get(url)    
-
+if pokemon_name:   
   if response.status_code == 200:
     pokemon_info = response.json()
     p_name = pokemon_info["name"].capitalize()
     p_id = pokemon_info["id"]
-    st.subheader(f"{p_name.title()} (#{p_id})")
+    st.subheader(f"***{p_name.title()}*** (#{p_id})")
 
     type_colors = {
         "Normal": "#A8A878",
@@ -78,7 +98,7 @@ if pokemon_name:
       )
 
     with col2:
-      st.markdown("### Quick Info")
+      st.markdown("### ***Quick Info***")
       # Display types nicely
       with st.popover("Type"):
         for item in pokemon_info["types"]:
@@ -98,29 +118,29 @@ if pokemon_name:
       st.markdown(f"> **Weight:** {pokemon_info['weight'] * 0.1:.1f} kg")
 
     st.markdown("---")
-    with st.popover("Settings"):
-        st.markdown("### Select the info you want to view related to the pokemon: ")
-        selected_choice = st.multiselect(
-            " ", ["STATS","ABILITIES","MOVES"], default=["STATS"]
-        )
-
-    if "STATS" in selected_choice:
-      st.markdown("### **Pokemon Stats**")
-      # Optional: You can put stats in columns or use metric cards here too!
-      for i in pokemon_info["stats"]:
-        st.markdown(f"> **{i['stat']['name'].upper()}:** {i['base_stat']}")
-
-    if "MOVES" in selected_choice:
-      st.markdown("### **Pokemon Moves**")
-      for i in pokemon_info["moves"][:10]:
-        st.markdown(f"> {i['move']['name'].capitalize()}")
-
-    if "ABILITIES" in selected_choice:
-      st.markdown("### **Pokemon Abilities**")
-      for i in pokemon_info["abilities"]:
-        st.markdown(f"> *{i["ability"]["name"].capitalize()}*")
-
     
+    selected_choice = st.segmented_control(
+        "***CHOOSE INFO TO VIEW*** ", 
+        ["STATS","ABILITIES","MOVES"], 
+        default=["STATS"],
+        selection_mode="multi",
+    )
+
+    col3, col4 = st.columns(2)
+    with col3:
+      if "STATS" in selected_choice:
+        st.markdown("#### ***Pokemon Stats***")
+        # Optional: You can put stats in columns or use metric cards here too!
+        for i in pokemon_info["stats"]:
+          st.markdown(f"> **{i['stat']['name'].upper()}:** {i['base_stat']}")
+    with col4:
+      if "ABILITIES" in selected_choice:
+        st.markdown("#### ***Pokemon Abilities***")
+        for i in pokemon_info["abilities"]:
+          st.markdown(f"> *{i["ability"]["name"].capitalize()}*")
       
-  else:
-    st.error("Pokémon not found! Check the spelling and try again.")
+      if "MOVES" in selected_choice:
+        with st.popover("***MOVES***"):
+          st.markdown("#### ***Pokemon Moves***")
+          for i in pokemon_info["moves"][:10]:
+            st.markdown(f"> {i['move']['name'].capitalize()}")
